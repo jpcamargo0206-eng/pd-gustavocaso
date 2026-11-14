@@ -123,7 +123,7 @@ td input{width:100%;background:transparent;border:0;border-bottom:1px solid var(
 #mapTop{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
 #chaos{display:flex;align-items:center;gap:16px}
 #chaos .num{font-family:var(--serif);font-size:58px;line-height:1}
-#chaosBar{display:flex;gap:6px;align-items:center;height:30px;margin-top:4px}
+#chaosBar{display:flex;gap:11px;align-items:center;height:30px;margin-top:4px}
 #chaosBar i{display:block;width:2px;height:24px;background:var(--ink);border-radius:2px;transition:transform .7s cubic-bezier(.2,.8,.2,1),opacity .5s}
 #mapTools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 #newIdea{border:0;border-bottom:1px solid var(--line);background:transparent;padding:8px 4px;outline:none;width:230px}
@@ -344,7 +344,7 @@ body.lite .rate,body.lite .tot,body.lite .rv{display:none}
 <section class="sec" id="caminhos" data-name="Caminhos" data-lvl="1">
   <div class="hd"><div><div class="n">05</div><h2>Caminhos</h2><div class="sub">muitas ideias, um foco</div></div><button class="donebtn" data-done="caminhos"><i></i>concluído</button></div>
   <div id="mapTop">
-    <div id="chaos"><div class="num" id="chaosNum">6</div><div><div style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mid)">caminhos na mesa</div><div id="chaosBar"></div></div></div>
+    <div id="chaos"><div class="num" id="chaosNum">6</div><div><div style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mid)">caminhos na mesa · cada traço é um caminho</div><div id="chaosBar"></div></div></div>
     <div id="mapTools">
       <input id="newIdea" placeholder="uma ideia sua…">
       <button class="tbtn" id="addIdea">+ Ideia</button>
@@ -643,7 +643,7 @@ const active=()=>S.cards.filter(c=>c.st!=='park').length;
 function mapOrder(){if(S.cards.some(c=>c.st==='focus'))return 1;const n=S.cards.length;return n<=1?1:(n-active())/(n-1)*0.85;}
 function paintChaos(){
   const f=S.cards.some(c=>c.st==='focus');$('#chaosNum').textContent=f?'1':active();
-  $('#chaosBar').innerHTML=S.cards.map((c,i)=>{const ok=f?c.st==='focus':c.st==='park';return '<i style="transform:rotate('+(ok?0:((i*47)%60)-30)+'deg);opacity:'+(f&&c.st!=='focus'?.25:1)+'"></i>';}).join('');
+  $('#chaosBar').innerHTML=S.cards.map((c,i)=>{const ok=f?c.st==='focus':c.st==='park';return '<i title="'+esc(c.t)+'" style="height:'+(ok?24:16+((i*7)%9))+'px;transform:rotate('+(ok?0:22+((i*13)%20))+'deg);opacity:'+(f&&c.st!=='focus'?.25:1)+'"></i>';}).join('');
 }
 function drag(e,c,el){
   if(linking||e.target.closest('button')||e.target.closest('.rt'))return;
