@@ -123,8 +123,8 @@ td input{width:100%;background:transparent;border:0;border-bottom:1px solid var(
 #mapTop{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
 #chaos{display:flex;align-items:center;gap:16px}
 #chaos .num{font-family:var(--serif);font-size:58px;line-height:1}
-#chaosBar{display:flex;gap:11px;align-items:center;height:30px;margin-top:4px}
-#chaosBar i{display:block;width:2px;height:24px;background:var(--ink);border-radius:2px;transition:transform .7s cubic-bezier(.2,.8,.2,1),opacity .5s}
+#chaosCv{width:300px;height:70px;margin-top:2px}
+.card .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-left:8px;vertical-align:middle;mix-blend-mode:multiply}
 #mapTools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 #newIdea{border:0;border-bottom:1px solid var(--line);background:transparent;padding:8px 4px;outline:none;width:230px}
 #mapWrap{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px}
@@ -145,6 +145,7 @@ td input{width:100%;background:transparent;border:0;border-bottom:1px solid var(
 .card.focus .rt i{background:#6a6965}
 .card.focus .rt i.on{background:var(--paper)}
 .card.mine{background:#EFE9E0}
+.card.mine.focus{background:var(--ink);color:var(--paper)}
 .rate{display:grid;grid-template-columns:56px 1fr;align-items:center;gap:2px 6px;margin:6px 0 8px}
 .rlab{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid)}
 .rt{display:flex;gap:7px;height:18px;align-items:center}
@@ -287,10 +288,9 @@ body.lite .rate,body.lite .tot,body.lite .rv{display:none}
 <section class="sec" id="momento" data-name="Momento" data-lvl="2">
   <div class="hd"><div><div class="n">02</div><h2>Momento</h2><div class="sub">onde você está hoje</div></div><button class="donebtn" data-done="momento"><i></i>concluído</button></div>
   <div class="grid g2">
-    <div class="box"><h3>Onde e como</h3>
-      <div class="field"><label>Onde você mora hoje</label><input type="text" data-k="mora" placeholder="cidade, país"></div>
-      <div class="field"><label>Pretende ficar onde está?</label><div class="chips" data-single="ficar"><button class="chip" data-v="Sim">Sim</button><button class="chip" data-v="Não sei">Não sei</button><button class="chip" data-v="Volto ao Brasil">Volto ao Brasil</button></div></div>
+    <div class="box"><h3>Como você atende</h3>
       <div class="field"><label>Formato</label><div class="chips" data-single="formato"><button class="chip" data-v="Online">Online</button><button class="chip" data-v="Presencial">Presencial</button><button class="chip" data-v="Híbrido">Híbrido</button></div></div>
+      <div class="field"><label>Onde estão seus pacientes hoje</label><div class="chips" data-single="pacOnde"><button class="chip" data-v="No Brasil">No Brasil</button><button class="chip" data-v="Fora do Brasil">Fora do Brasil</button><button class="chip" data-v="Os dois">Os dois</button></div></div>
     </div>
     <div class="box"><h3>Sua clínica hoje</h3>
       <div class="field"><label>Quem você atende hoje</label><input type="text" data-k="publico" placeholder="perfil dos pacientes"></div>
@@ -344,7 +344,7 @@ body.lite .rate,body.lite .tot,body.lite .rv{display:none}
 <section class="sec" id="caminhos" data-name="Caminhos" data-lvl="1">
   <div class="hd"><div><div class="n">05</div><h2>Caminhos</h2><div class="sub">muitas ideias, um foco</div></div><button class="donebtn" data-done="caminhos"><i></i>concluído</button></div>
   <div id="mapTop">
-    <div id="chaos"><div class="num" id="chaosNum">6</div><div><div style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mid)">caminhos na mesa · cada traço é um caminho</div><div id="chaosBar"></div></div></div>
+    <div id="chaos"><div class="num" id="chaosNum">6</div><div><div style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mid)">caminhos na mesa · cada círculo é um caminho</div><canvas id="chaosCv"></canvas></div></div>
     <div id="mapTools">
       <input id="newIdea" placeholder="uma ideia sua…">
       <button class="tbtn" id="addIdea">+ Ideia</button>
@@ -460,7 +460,7 @@ const KEY='gc-sessao-01-v2';
 const AVATAR='data:image/jpeg;base64,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';
 const BIO_BEFORE='• Te acompanho no cuidado da mente e das emoções\n• Atendendo brasileiros pelo mundo\n• Terapia Cognitivo Comportamental\n• Agende pelo WhatsApp ↓';
 const BIOS=[
- 'CRP 08/33372 · TCC\n• Terapia online para brasileiros que vivem fora 🌍\n• Ansiedade, autocobrança e recomeços\n• Agende pelo WhatsApp ↓',
+ 'CRP 08/33372 · TCC\n• Terapia online para brasileiros que vivem fora do Brasil 🌍\n• Ansiedade, autocobrança e recomeços\n• Agende pelo WhatsApp ↓',
  'CRP 08/33372\n• Te acompanho no cuidado da mente, onde você estiver\n• TCC · online, no seu fuso\n• Agende pelo WhatsApp ↓'
 ];
 const DEF_CARDS=[
@@ -611,7 +611,7 @@ function renderBoard(){
     el.className='card'+(c.st==='park'?' parked':'')+(c.st==='focus'?' focus':'')+(c.mine?' mine':'')+(linkFrom===c.id?' sel':'');
     el.style.left=(c.x||0)+'%';el.style.top=(c.y||0)+'%';el.dataset.id=c.id;
     let rate='';FILTERS.forEach((f,fi)=>{rate+='<span class="rlab">'+f+'</span><span class="rt">';for(let v=1;v<=5;v++)rate+='<i data-f="'+fi+'" data-v="'+v+'" class="'+(c.s[fi]>=v?'on':'')+'"></i>';rate+='</span>';});
-    el.innerHTML='<div class="grab"><div><div class="id">'+c.id+'</div><div class="ttl">'+esc(c.t)+'</div></div>'+(c.tag?'<span class="tag">'+c.tag+'</span>':(c.mine?'<span class="tag" style="background:var(--sand)">ideia sua</span>':''))+'</div>'+
+    el.innerHTML='<div class="grab"><div><div class="id">'+c.id+'<span class="dot" style="background:'+cardCol(c)+'"></span></div><div class="ttl">'+esc(c.t)+'</div></div>'+(c.tag?'<span class="tag">'+c.tag+'</span>':(c.mine?'<span class="tag" style="background:var(--sand)">ideia sua</span>':''))+'</div>'+
       (c.d?'<div class="ds">'+esc(c.d)+'</div>':'')+(c.q?'<div class="q">'+esc(c.q)+'</div>':'')+'<div class="rate">'+rate+'</div>'+
       '<div class="cact"><span class="tot">'+total(c)+'</span><span style="display:flex;gap:5px"><button data-a="focus">'+(c.st==='focus'?'foco ✓':'foco')+'</button><button data-a="park">'+(c.st==='park'?'voltar':'guardar')+'</button></span></div>'+
       (c.h?'<div class="note-j" style="margin-top:10px"><b>Minha nota: '+c.hs+'</b> · '+esc(c.h)+'</div>':'');
@@ -641,10 +641,25 @@ function renderRank(){
 }
 const active=()=>S.cards.filter(c=>c.st!=='park').length;
 function mapOrder(){if(S.cards.some(c=>c.st==='focus'))return 1;const n=S.cards.length;return n<=1?1:(n-active())/(n-1)*0.85;}
-function paintChaos(){
-  const f=S.cards.some(c=>c.st==='focus');$('#chaosNum').textContent=f?'1':active();
-  $('#chaosBar').innerHTML=S.cards.map((c,i)=>{const ok=f?c.st==='focus':c.st==='park';return '<i title="'+esc(c.t)+'" style="height:'+(ok?24:16+((i*7)%9))+'px;transform:rotate('+(ok?0:22+((i*13)%20))+'deg);opacity:'+(f&&c.st!=='focus'?.25:1)+'"></i>';}).join('');
+const PAL=['#D9CEBF','#C3D6DE','#B8A68D','#8FB0BE','#CBB9A0','#A9B7BC','#E0C9B0','#9AA6A0'];
+function cardCol(c){return PAL[S.cards.indexOf(c)%PAL.length];}
+function paintChaos(){const f=S.cards.some(c=>c.st==='focus');$('#chaosNum').textContent=f?'1':active();}
+const chaosCv=$('#chaosCv'),ccx=chaosCv.getContext('2d');const bubbles={};
+function chaosFrame(ts){
+  const w=chaosCv.clientWidth,h=chaosCv.clientHeight;if(w&&(chaosCv.width!==w*DPR)){chaosCv.width=w*DPR;chaosCv.height=h*DPR;}
+  ccx.setTransform(DPR,0,0,DPR,0,0);ccx.clearRect(0,0,w,h);ccx.globalCompositeOperation='multiply';
+  const t=ts/1000,f=S.cards.some(c=>c.st==='focus');const act=S.cards.filter(c=>c.st!=='park');const n=act.length||1;
+  S.cards.forEach((c,i)=>{const b=bubbles[c.id]||(bubbles[c.id]={x:w/2,y:h/2,r:2,a:0});
+    let tx,ty,tr,ta;
+    if(f){if(c.st==='focus'){tx=w*0.32;ty=h/2;tr=24;ta=.95;}else{tx=w*0.62+i*13;ty=h/2+Math.sin(t+i)*6;tr=5;ta=.35;}}
+    else if(c.st==='park'){tx=w-12-(i*12);ty=h-10;tr=5;ta=.35;}
+    else{const k=act.indexOf(c);const sp=Math.min(26,(w*0.7)/n);tx=20+k*sp+Math.sin(t*0.9+i*1.7)*9;ty=h/2+Math.cos(t*1.1+i*2.3)*11;tr=17+Math.sin(t*0.7+i)*2;ta=.82;}
+    b.x+=(tx-b.x)*.08;b.y+=(ty-b.y)*.08;b.r+=(tr-b.r)*.08;b.a+=(ta-b.a)*.08;
+    ccx.globalAlpha=b.a;ccx.fillStyle=cardCol(c);ccx.beginPath();ccx.arc(b.x,b.y,Math.max(1,b.r),0,6.283);ccx.fill();});
+  ccx.globalCompositeOperation='source-over';ccx.globalAlpha=1;
+  requestAnimationFrame(chaosFrame);
 }
+
 function drag(e,c,el){
   if(linking||e.target.closest('button')||e.target.closest('.rt'))return;
   const r=board.getBoundingClientRect(),er=el.getBoundingClientRect(),ox=e.clientX-er.left,oy=e.clientY-er.top;let moved=false;
@@ -708,6 +723,18 @@ function handPaths(w,h){const c=w/2,y=h/2,R=Math.min(46,w*0.06);
   const L=[[[w*0.06,y+14],[c-8,y+14]],[[c-8,y+14],[c+R*1.4,y+14],[c+R*1.4,y-R-6],[c-10,y-R-6]]];
   const Rp=[[[w*0.94,y-14],[c+8,y-14]],[[c+8,y-14],[c-R*1.4,y-14],[c-R*1.4,y+R+6],[c+10,y+R+6]]];
   return [L,Rp];}
+function resample(pts,N){const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
+  const T=L[L.length-1],out=[];let j=0;for(let k=0;k<N;k++){const d=T*k/(N-1);while(j<L.length-2&&L[j+1]<d)j++;const seg=(L[j+1]-L[j])||1,u=(d-L[j])/seg;out.push([pts[j][0]+(pts[j+1][0]-pts[j][0])*u,pts[j][1]+(pts[j+1][1]-pts[j][1])*u]);}return out;}
+function arcPts(cx,cy,r,a0,a1,n){const o=[];for(let i=0;i<=n;i++){const a=(a0+(a1-a0)*i/n)*Math.PI/180;o.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]);}return o;}
+function linePts(x0,y0,x1,y1,n){const o=[];for(let i=0;i<=n;i++)o.push([x0+(x1-x0)*i/n,y0+(y1-y0)*i/n]);return o;}
+function bezPts(p0,p1,p2,p3,n){const o=[];for(let i=0;i<=n;i++){const t=i/n,u=1-t;o.push([u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]]);}return o;}
+function monoPaths(w,h){const c=w/2,y=h/2,R=Math.min(44,w*0.06),r=R*0.95;
+  const jx=c-R*1.3,cx2=c+R*1.3;
+  const J=[].concat(linePts(w*0.06,y-R*0.9,jx+R*0.3,y-R*0.9,40),linePts(jx+R*0.3,y-R*0.9,jx+R*0.3,y+R*0.3,20),bezPts([jx+R*0.3,y+R*0.3],[jx+R*0.3,y+R*1.05],[jx-R*0.5,y+R*1.05],[jx-R*0.5,y+R*0.4],24));
+  const C=[].concat(linePts(w*0.94,y+r*0.87,cx2+r*0.5,y+r*0.87,40),arcPts(cx2,y,r,60,300,48));
+  const ge=-330*Math.PI/180;
+  const G=[].concat(arcPts(c,y,r,-45,-330,52),linePts(c+r*Math.cos(ge),y+r*Math.sin(ge),c+r*0.87,y+r*0.06,8),linePts(c+r*0.87,y+r*0.06,c+r*0.2,y+r*0.06,10));
+  return {J:resample(J,260),C:resample(C,260),G:resample(G,160)};}
 function retargetClose(a,mode,keep){
   a.mode=mode;if(!keep)a.modeT=performance.now();const w=a.w,h=a.h;let T=[];
   if(mode==='yes'){handPaths(w,h).forEach(p=>{samplePath(p,20).dash.forEach(d=>T.push({x:d.x,y:d.y,r:d.a,l:11}));});}
@@ -717,6 +744,7 @@ function retargetClose(a,mode,keep){
     x=c+g/2+6;while(x<w*0.86){const l=rnd(14,34);T.push({x:x+l/2,y,r:0,l});x+=l+9;}}
   a.st.forEach((s,i)=>{const t=T[i%T.length];s.gx=t.x;s.gy=t.y;s.gr=t.r;s.gl=t.l;s.extra=i>=T.length;s.delay=Math.random()*0.5+(mode==='later'?i*0.012:0);});
   a.paths=mode==='yes'?handPaths(w,h):null;
+  if(mode==='yes'){const hp=handPaths(w,h);a.hs=hp.map(p=>resample(samplePath(p,2).pts,260));a.mono=monoPaths(w,h);}
 }
 let lastScroll=0;
 function frame(ts){
@@ -746,13 +774,18 @@ function frame(ts){
         if(s.sx===undefined||s.lastMode!==a.mode){s.sx=s.x;s.sy=s.y;s.sr=s.r;s.sl=s.l;s.lastMode=a.mode;}
         s.x=s.sx+(s.gx-s.sx)*k;s.y=s.sy+(s.gy-s.sy)*k;s.r=s.sr+(s.gr-s.sr)*k;s.l=s.sl+(s.gl-s.sl)*k;
         let alpha=s.extra?Math.max(0,.5-k*.5):.35+.65*k;
-        if(a.mode==='yes'){const fade=Math.max(0,Math.min(1,(e-2.2)/1));alpha*=1-fade*0.85;}
+        if(a.mode==='yes'){const fade=Math.max(0,Math.min(1,(e-2.2)/1));alpha*=(1-fade*0.85)*(1-Math.max(0,Math.min(1,(e-4)/1)));if(alpha<.01)return;}
         draw(cx,s.x,s.y+(a.mode==='later'?Math.sin(t+s.ph)*0.6:0),s.r,s.l,a.mode==='yes'?'#232321':s.col,alpha);
       });
-      if(a.mode==='yes'&&a.paths){const d=Math.max(0,Math.min(1,(e-2.0)/1.4));if(d>0){cx.globalAlpha=1;cx.strokeStyle='#232321';cx.lineWidth=2.6;
-        a.paths.forEach((p,pi)=>{const sm=samplePath(p,4).pts;const n=Math.floor(sm.length*ease(d));cx.beginPath();sm.slice(0,Math.max(2,n)).forEach((q,i)=>i?cx.lineTo(q[0],q[1]):cx.moveTo(q[0],q[1]));cx.stroke();});
-        if(d>=1){const pulse=Math.sin((e-3.4)*2.2);if(pulse>0){cx.globalAlpha=.25*pulse;cx.strokeStyle='#8FB0BE';cx.lineWidth=8;a.paths.forEach(p=>{const sm=samplePath(p,6).pts;cx.beginPath();sm.forEach((q,i)=>i?cx.lineTo(q[0],q[1]):cx.moveTo(q[0],q[1]));cx.stroke();});}}
-        cx.globalAlpha=1;}}
+      if(a.mode==='yes'&&a.paths){
+        const poly=(pts,n)=>{cx.beginPath();pts.slice(0,Math.max(2,n)).forEach((q,i)=>i?cx.lineTo(q[0],q[1]):cx.moveTo(q[0],q[1]));cx.stroke();};
+        cx.globalAlpha=1;cx.strokeStyle='#232321';cx.lineWidth=2.6;cx.lineJoin='round';
+        if(e<4.0){const d=Math.max(0,Math.min(1,(e-2.0)/1.4));if(d>0)a.hs.forEach(p=>poly(p,Math.floor(p.length*ease(d))));}
+        else{const m=ease(Math.max(0,Math.min(1,(e-4.0)/1.8)));const tg=[a.mono.J,a.mono.C];
+          a.hs.forEach((p,pi)=>{const q=p.map((pt,k)=>[pt[0]+(tg[pi][k][0]-pt[0])*m,pt[1]+(tg[pi][k][1]-pt[1])*m]);poly(q,q.length);});
+          const g=ease(Math.max(0,Math.min(1,(e-5.4)/1.3)));if(g>0){cx.strokeStyle='#8FB0BE';poly(a.mono.G,Math.floor(a.mono.G.length*g));cx.strokeStyle='#232321';}
+          if(e>7){const pulse=Math.sin((e-7)*2);if(pulse>0){cx.globalAlpha=.22*pulse;cx.strokeStyle='#B8A68D';cx.lineWidth=9;[a.mono.J,a.mono.C,a.mono.G].forEach(p=>poly(p,p.length));}}}
+        cx.globalAlpha=1;}
     }
   });
   requestAnimationFrame(frame);
@@ -763,7 +796,7 @@ function draw(cx,x,y,r,l,col,al){const dx=Math.cos(r)*l/2,dy=Math.sin(r)*l/2;cx.
 const closeArt=arts.find(a=>a.kind==='close');
 function endWith(mode){S.end=mode;save();setup(closeArt);closeArt.st.forEach(s=>{s.sx=undefined;});retargetClose(closeArt,mode);
   const m=$('#closeMsg');m.classList.remove('on');
-  setTimeout(()=>{$('#cmT').textContent=mode==='yes'?'Vamos juntos':'A porta fica aberta';$('#cmP').textContent=mode==='yes'?'da mente ao método, agora a dois':'a amizade vem antes, e o convite continua de pé';m.classList.add('on');},mode==='yes'?2600:2200);
+  setTimeout(()=>{$('#cmT').textContent=mode==='yes'?'Vamos juntos':'A porta fica aberta';$('#cmP').textContent=mode==='yes'?'da mente ao método, agora a dois':'a amizade vem antes, e o convite continua de pé';m.classList.add('on');},mode==='yes'?6400:2200);
   $('#yesBtn').classList.toggle('on',mode==='yes');$('#laterBtn').classList.toggle('on',mode==='later');}
 $('#yesBtn').onclick=()=>endWith('yes');$('#laterBtn').onclick=()=>endWith('later');
 
@@ -771,7 +804,7 @@ $('#yesBtn').onclick=()=>endWith('yes');$('#laterBtn').onclick=()=>endWith('late
 function v(k){const x=S.fields[k];if(S.fields['skip_'+k])return '(passou)';if(Array.isArray(x))return x.length?x.join(', '):'—';return (x===undefined||x==='')?'—':x;}
 function summary(){const L=[],lv={1:'Conversa de amigo',2:'Panorama',3:'Diagnóstico'};
   L.push('CONVERSA · GUSTAVO CASON · '+new Date().toLocaleDateString('pt-BR'));L.push('Nível: '+(lv[S.level]||'—'));L.push('');
-  L.push('MOMENTO');L.push('Mora: '+v('mora')+' · Fica: '+v('ficar')+' · Formato: '+v('formato'));L.push('Atende: '+v('publico')+' · Desde: '+v('tempo')+' · Agenda: '+v('agenda'));L.push('');
+  L.push('MOMENTO');L.push('Formato: '+v('formato')+' · Pacientes: '+v('pacOnde'));L.push('Atende: '+v('publico')+' · Desde: '+v('tempo')+' · Agenda: '+v('agenda'));L.push('');
   L.push('IDENTIDADE');L.push('"Sou psicólogo para '+v('id_para')+' que '+v('id_que')+'"');L.push('Marca: '+v('marca')+(S.fields.marca_livre?' · '+S.fields.marca_livre:'')+' · Modelo: '+v('modelo'));L.push('');
   L.push('TRAVA');L.push(v('trava')+' · '+v('trava_frase'));L.push('');
   L.push('CAMINHOS');S.cards.slice().sort((a,b)=>total(b)-total(a)).forEach(c=>L.push((c.st==='focus'?'★ ':c.st==='park'?'· guardado · ':'- ')+c.id+'. '+c.t+(total(c)?' — '+total(c)+'/20':'')));
@@ -793,7 +826,7 @@ addEventListener('resize',()=>{sizeArts();layoutCards(true);renderBoard();});
 applyNotes();calc();if(S.fields.bio3)$('#bioEdit').value=S.fields.bio3;paintBio();
 applyLevel();trackCur();
 if(S.end){setTimeout(()=>endWith(S.end),400);}
-requestAnimationFrame(frame);
+requestAnimationFrame(frame);requestAnimationFrame(chaosFrame);
 })();
 </script>
 </body>
