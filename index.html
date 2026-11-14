@@ -728,13 +728,11 @@ function resample(pts,N){const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+
 function arcPts(cx,cy,r,a0,a1,n){const o=[];for(let i=0;i<=n;i++){const a=(a0+(a1-a0)*i/n)*Math.PI/180;o.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]);}return o;}
 function linePts(x0,y0,x1,y1,n){const o=[];for(let i=0;i<=n;i++)o.push([x0+(x1-x0)*i/n,y0+(y1-y0)*i/n]);return o;}
 function bezPts(p0,p1,p2,p3,n){const o=[];for(let i=0;i<=n;i++){const t=i/n,u=1-t;o.push([u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]]);}return o;}
-function monoPaths(w,h){const c=w/2,y=h/2,R=Math.min(44,w*0.06),r=R*0.95;
-  const jx=c-R*1.3,cx2=c+R*1.3;
-  const J=[].concat(linePts(w*0.06,y-R*0.9,jx+R*0.3,y-R*0.9,40),linePts(jx+R*0.3,y-R*0.9,jx+R*0.3,y+R*0.3,20),bezPts([jx+R*0.3,y+R*0.3],[jx+R*0.3,y+R*1.05],[jx-R*0.5,y+R*1.05],[jx-R*0.5,y+R*0.4],24));
-  const C=[].concat(linePts(w*0.94,y+r*0.87,cx2+r*0.5,y+r*0.87,40),arcPts(cx2,y,r,60,300,48));
-  const ge=-330*Math.PI/180;
-  const G=[].concat(arcPts(c,y,r,-45,-330,52),linePts(c+r*Math.cos(ge),y+r*Math.sin(ge),c+r*0.87,y+r*0.06,8),linePts(c+r*0.87,y+r*0.06,c+r*0.2,y+r*0.06,10));
-  return {J:resample(J,260),C:resample(C,260),G:resample(G,160)};}
+function monoPaths(w,h){const c=w/2,y=h/2,R=Math.min(54,w*0.07);
+  const rx=c+R*0.22,jx=c-R*0.18;
+  const J=[].concat(linePts(jx,y-R*1.3,jx,y+R*0.5,40),bezPts([jx,y+R*0.5],[jx,y+R*1.2],[jx-R*0.95,y+R*1.2],[jx-R*0.95,y+R*0.45],30));
+  const O=arcPts(rx,y,R,-62,262,80);
+  return {J:resample(J,260),O:resample(O,260),dot:[jx,y-R*1.68],R};}
 function retargetClose(a,mode,keep){
   a.mode=mode;if(!keep)a.modeT=performance.now();const w=a.w,h=a.h;let T=[];
   if(mode==='yes'){handPaths(w,h).forEach(p=>{samplePath(p,20).dash.forEach(d=>T.push({x:d.x,y:d.y,r:d.a,l:11}));});}
@@ -781,10 +779,10 @@ function frame(ts){
         const poly=(pts,n)=>{cx.beginPath();pts.slice(0,Math.max(2,n)).forEach((q,i)=>i?cx.lineTo(q[0],q[1]):cx.moveTo(q[0],q[1]));cx.stroke();};
         cx.globalAlpha=1;cx.strokeStyle='#232321';cx.lineWidth=2.6;cx.lineJoin='round';
         if(e<4.0){const d=Math.max(0,Math.min(1,(e-2.0)/1.4));if(d>0)a.hs.forEach(p=>poly(p,Math.floor(p.length*ease(d))));}
-        else{const m=ease(Math.max(0,Math.min(1,(e-4.0)/1.8)));const tg=[a.mono.J,a.mono.C];
-          a.hs.forEach((p,pi)=>{const q=p.map((pt,k)=>[pt[0]+(tg[pi][k][0]-pt[0])*m,pt[1]+(tg[pi][k][1]-pt[1])*m]);poly(q,q.length);});
-          const g=ease(Math.max(0,Math.min(1,(e-5.4)/1.3)));if(g>0){cx.strokeStyle='#8FB0BE';poly(a.mono.G,Math.floor(a.mono.G.length*g));cx.strokeStyle='#232321';}
-          if(e>7){const pulse=Math.sin((e-7)*2);if(pulse>0){cx.globalAlpha=.22*pulse;cx.strokeStyle='#B8A68D';cx.lineWidth=9;[a.mono.J,a.mono.C,a.mono.G].forEach(p=>poly(p,p.length));}}}
+        else{const m=ease(Math.max(0,Math.min(1,(e-4.0)/2.0)));const tg=[a.mono.J,a.mono.O];
+          a.hs.forEach((p,pi)=>{const q=p.map((pt,k)=>[pt[0]+(tg[pi][k][0]-pt[0])*m,pt[1]+(tg[pi][k][1]-pt[1])*m]);cx.strokeStyle='#232321';cx.lineWidth=2.6+m*0.8;poly(q,q.length);});
+          const dd=ease(Math.max(0,Math.min(1,(e-5.8)/0.9)));if(dd>0){cx.globalAlpha=dd;cx.fillStyle='#8FB0BE';cx.beginPath();cx.arc(a.mono.dot[0],a.mono.dot[1]-(1-dd)*14,4.5,0,6.283);cx.fill();cx.globalAlpha=1;}
+          if(e>7){const pulse=Math.sin((e-7)*1.8);if(pulse>0){cx.globalAlpha=.22*pulse;cx.strokeStyle='#B8A68D';cx.lineWidth=10;[a.mono.J,a.mono.O].forEach(p=>poly(p,p.length));}}}
         cx.globalAlpha=1;}
     }
   });
@@ -796,7 +794,7 @@ function draw(cx,x,y,r,l,col,al){const dx=Math.cos(r)*l/2,dy=Math.sin(r)*l/2;cx.
 const closeArt=arts.find(a=>a.kind==='close');
 function endWith(mode){S.end=mode;save();setup(closeArt);closeArt.st.forEach(s=>{s.sx=undefined;});retargetClose(closeArt,mode);
   const m=$('#closeMsg');m.classList.remove('on');
-  setTimeout(()=>{$('#cmT').textContent=mode==='yes'?'Vamos juntos':'A porta fica aberta';$('#cmP').textContent=mode==='yes'?'da mente ao método, agora a dois':'a amizade vem antes, e o convite continua de pé';m.classList.add('on');},mode==='yes'?6400:2200);
+  setTimeout(()=>{$('#cmT').textContent=mode==='yes'?'Juntos':'A porta fica aberta';$('#cmP').textContent=mode==='yes'?'da mente ao método':'a amizade vem antes, e o convite continua de pé';m.classList.add('on');},mode==='yes'?6400:2200);
   $('#yesBtn').classList.toggle('on',mode==='yes');$('#laterBtn').classList.toggle('on',mode==='later');}
 $('#yesBtn').onclick=()=>endWith('yes');$('#laterBtn').onclick=()=>endWith('later');
 
