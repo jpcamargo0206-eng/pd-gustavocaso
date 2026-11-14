@@ -890,7 +890,7 @@ let armed=false;$('#resetBtn').onclick=()=>{if(!armed){armed=true;$('#resetBtn')
 /* ---------- init ---------- */
 let lastBW=0;addEventListener('resize',()=>{sizeArts();const bw=board.clientWidth;if(bw&&Math.abs(bw-lastBW)>40)layoutCards(true);renderBoard();trackCur();});
 (function(){const h=$('#hero h1');const lines=h.innerHTML.split(/<br\s*\/?>/i);h.setAttribute('aria-label',lines.join(' '));
-  h.innerHTML=lines.map((ln,li)=>[...ln].map((c,ci)=>'<span class="ch" aria-hidden="true" style="animation-delay:'+(0.3+li*0.4+ci*0.06).toFixed(2)+'s">'+c+'</span>').join('')).join('<br>');})();
+  h.innerHTML=lines.map((ln,li)=>'<span style="white-space:nowrap;display:inline-block">'+[...ln].map((c,ci)=>'<span class="ch" aria-hidden="true" style="animation-delay:'+(0.3+li*0.4+ci*0.06).toFixed(2)+'s">'+c+'</span>').join('')+'</span>').join('<br>');})();
 function tick(){const c=$('#clock');if(!S.t0||!S.level){c.textContent='relógio começa ao escolher o nível';c.classList.remove('over');return;}
   const sec=Math.floor((Date.now()-S.t0)/1000),plan={1:30,2:60,3:90}[S.level];
   c.textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')+' · previsto ~'+plan+' min';c.classList.toggle('over',sec>plan*60);}
